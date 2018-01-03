@@ -12,7 +12,7 @@ import spring.server.repository.AlexaRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/alexa")
+@RequestMapping("/alexa2")
 public class AlexaController {
 
     private AlexaRepository alexaRepository;

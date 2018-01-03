@@ -12,7 +12,7 @@ import spring.server.repository.BeaconRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/beacon")
+@RequestMapping("/beacon2")
 public class BeaconController {
 
     private BeaconRepository beaconRepository;
