@@ -10,7 +10,12 @@ import spring.server.entity.request.AddAlexa;
 import spring.server.entity.request.AddBeacon;
 import spring.server.entity.request.Alexa.AlexaJSON;
 import spring.server.repository.*;
+import spring.server.strategy.Context;
+import spring.server.strategy.GetAlexaID;
+import spring.server.strategy.SendAlexaLocation;
+import spring.server.strategy.Strategy;
 
+import javax.json.JsonObject;
 import java.util.List;
 
 @RestController
@@ -46,6 +51,20 @@ public class MainController {
 
     @RequestMapping(value = "/alexa", method = RequestMethod.POST)
     public String getID(@RequestBody AlexaJSON alexaJSON){
+        String message = alexaJSON.getMessage();
+        Context context;
+        switch (message){
+            case "GetID":{
+                context = new Context(new GetAlexaID());
+            }
+            case "GiveLocation":{
+                context = new Context(new SendAlexaLocation());
+            }
+            default:{
+                System.out.println("Bad alexa request");
+            }
+        }
+        //TODO: should return JSON not string
         return alexaJSON.getMessage();
     }
 
