@@ -6,14 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import spring.server.entity.*;
-import spring.server.entity.request.Alexa.AddAlexa;
-import spring.server.entity.request.AddBeacon;
-import spring.server.entity.request.Alexa.AlexaJSON;
+import spring.server.entity.request.Alexa.*;
 import spring.server.repository.*;
-import spring.server.strategy.Context;
-import spring.server.strategy.GetAlexaID;
-import spring.server.strategy.SendAlexaLocation;
+import spring.server.strategy.*;
 
+import javax.json.JsonObject;
 import java.util.List;
 
 @RestController
@@ -36,6 +33,7 @@ public class MainController extends BeaconController{
     public String getID(@RequestBody AlexaJSON alexaJSON){
         String message = alexaJSON.getMessage();
         Context context;
+        JsonObject jsonObject;
         switch (message){
             case "GetID":{
                 context = new Context(new GetAlexaID());
@@ -43,6 +41,7 @@ public class MainController extends BeaconController{
             }
             case "GiveLocation":{
                 context = new Context(new SendAlexaLocation());
+                jsonObject = context.executeStrategy("message","tmp");
                 break;
             }
             default:{
@@ -50,7 +49,7 @@ public class MainController extends BeaconController{
             }
         }
         //TODO: should return JSON not string
-        return alexaJSON.getMessage();
+        return message;
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.PUT)
