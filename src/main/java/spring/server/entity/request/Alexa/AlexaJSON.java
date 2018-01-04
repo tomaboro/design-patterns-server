@@ -10,4 +10,8 @@ public class AlexaJSON {
     public void setRequest(AlexaRequest request) {
         this.request = request;
     }
+
+    public String getMessage(){
+        return request.intent.getName();
+    }
 }

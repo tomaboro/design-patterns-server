@@ -45,13 +45,12 @@ public class MainController {
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.POST)
-    public String getID(@RequestBody AlexaJSON alexaJSON, String elo){
-        return alexaJSON.getRequest().getIntent().getName();
+    public String getID(@RequestBody AlexaJSON alexaJSON){
+        return alexaJSON.getMessage();
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.PUT)
-    public void AddAlexa(@RequestBody AddAlexa addAlexa, String elo){
-        System.out.println(elo);
+    public void AddAlexa(@RequestBody AddAlexa addAlexa){
         Alexa alexa = new Alexa();
         alexa.setId(addAlexa.getId());
         alexaRepository.save(alexa);
