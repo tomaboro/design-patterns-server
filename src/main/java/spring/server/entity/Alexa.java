@@ -8,7 +8,7 @@ public class Alexa {
     //TODO: the alexa JSON objects
 
     @Id
-    String id;
+    private String id;
 
     public String getId() {
         return id;

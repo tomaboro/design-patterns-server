@@ -1,5 +1,7 @@
 package spring.server.strategy;
 
+import javax.json.JsonObject;
+
 public interface Strategy {
-    public void sendMessage(String message, String where);
+    public JsonObject sendJson(String message, String where);
 }

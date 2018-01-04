@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import spring.server.entity.*;
 import spring.server.entity.request.AddAlexa;
+import spring.server.entity.request.AddBeacon;
 import spring.server.entity.request.Alexa.AlexaJSON;
 import spring.server.repository.*;
 
@@ -27,6 +28,15 @@ public class MainController {
     @RequestMapping(value = "/beacon", method = RequestMethod.GET)
     public List<Beacon> getBeacon(){
         return beaconRepository.findAll();
+    }
+
+    @RequestMapping(value = "/beacon", method = RequestMethod.POST)
+    public String addBeacon(@RequestBody AddBeacon addBeacon){
+        Beacon beacon = new Beacon();
+        beacon.setId(addBeacon.getId());
+        beacon.setType(addBeacon.getType());
+        beaconRepository.save(beacon);
+        return "Positive request";
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.GET)
