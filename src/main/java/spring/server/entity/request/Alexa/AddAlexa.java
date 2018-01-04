@@ -1,4 +1,4 @@
-package spring.server.entity.request;
+package spring.server.entity.request.Alexa;
 
 public class AddAlexa {
     private String id;

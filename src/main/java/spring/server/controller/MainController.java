@@ -6,16 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import spring.server.entity.*;
-import spring.server.entity.request.AddAlexa;
+import spring.server.entity.request.Alexa.AddAlexa;
 import spring.server.entity.request.AddBeacon;
 import spring.server.entity.request.Alexa.AlexaJSON;
 import spring.server.repository.*;
 import spring.server.strategy.Context;
 import spring.server.strategy.GetAlexaID;
 import spring.server.strategy.SendAlexaLocation;
-import spring.server.strategy.Strategy;
 
-import javax.json.JsonObject;
 import java.util.List;
 
 @RestController
