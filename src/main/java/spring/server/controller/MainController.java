@@ -17,29 +17,14 @@ import spring.server.strategy.SendAlexaLocation;
 import java.util.List;
 
 @RestController
-public class MainController {
+public class MainController extends BeaconController{
 
-    private BeaconRepository beaconRepository;
     private AlexaRepository alexaRepository;
 
     @Autowired
     public MainController(BeaconRepository beaconRepository, AlexaRepository alexaRepository){
-        this.beaconRepository = beaconRepository;
+        super(beaconRepository);
         this.alexaRepository = alexaRepository;
-    }
-
-    @RequestMapping(value = "/beacon", method = RequestMethod.GET)
-    public List<Beacon> getBeacon(){
-        return beaconRepository.findAll();
-    }
-
-    @RequestMapping(value = "/beacon", method = RequestMethod.POST)
-    public String addBeacon(@RequestBody AddBeacon addBeacon){
-        Beacon beacon = new Beacon();
-        beacon.setId(addBeacon.getId());
-        beacon.setType(addBeacon.getType());
-        beaconRepository.save(beacon);
-        return "Positive request";
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.GET)
@@ -54,9 +39,11 @@ public class MainController {
         switch (message){
             case "GetID":{
                 context = new Context(new GetAlexaID());
+                break;
             }
             case "GiveLocation":{
                 context = new Context(new SendAlexaLocation());
+                break;
             }
             default:{
                 System.out.println("Bad alexa request");
