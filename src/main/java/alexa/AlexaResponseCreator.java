@@ -2,30 +2,35 @@ package alexa;
 
 public class AlexaResponseCreator {
 
-	private String alexaResponse;
+    private AlexaResponse alexaResponse;
 
-	public AlexaResponseCreator(String text) {
-		OutputSpeechType outputSpeechType = new OutputSpeechType();
-		outputSpeechType.setText("Odpowiedz to " + text);
-		outputSpeechType.setType("Plain text");
-		OutputSpeech outputSpeech = new OutputSpeech();
-		outputSpeech.setText("Odpowiedz to " + text);
-		Response response = new Response();
-		response.setOutputSpeech(outputSpeech);
-		response.setOutputSpeechType(outputSpeechType);
-		response.setShouldEndSession("true");
-		AlexaResponse alexaResponse = new AlexaResponse();
-		alexaResponse.setResponse(response);
-		alexaResponse.setVersion("1.0");
-		alexaResponse.setSessionAttributes("{}");
-		this.alexaResponse = alexaResponse.toString();
-	}
+    public AlexaResponseCreator(String text, Boolean shouldEndSession) {
+        OutputSpeechType outputSpeechType = new OutputSpeechType();
+        outputSpeechType.setText(text);
+        outputSpeechType.setType("Plain text");
+        OutputSpeech outputSpeech = new OutputSpeech();
+        outputSpeech.setText(text);
+        Response response = new Response();
+        response.setOutputSpeech(outputSpeech);
+        response.setOutputSpeechType(outputSpeechType);
+        response.setShouldEndSession(shouldEndSession.toString());
+        AlexaResponse alexaResponse = new AlexaResponse();
+        alexaResponse.setResponse(response);
+        alexaResponse.setVersion("1.0");
+        alexaResponse.setSessionAttributes("{}");
+        this.alexaResponse = alexaResponse;
+    }
 
-	public void setAlexaResponse(String alexaResponse) {
-		this.alexaResponse = alexaResponse;
-	}
+    public void setAlexaResponse(AlexaResponse alexaResponse) {
+        this.alexaResponse = alexaResponse;
+    }
 
-	public String getAlexaResponse() {
-		return this.alexaResponse;
-	}
+    public AlexaResponse getAlexaResponse() {
+        return this.alexaResponse;
+    }
+
+    public void setMessageText(String text) {
+        this.alexaResponse.getResponse().getOutputSpeech().setText(text);
+        this.alexaResponse.getResponse().getOutputSpeechType().setText(text);
+    }
 }

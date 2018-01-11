@@ -1,5 +1,7 @@
 package spring.server.strategy;
 
+import spring.server.repository.UserRepository;
+
 import javax.json.JsonObject;
 
 public class Context {
@@ -9,7 +11,7 @@ public class Context {
         this.strategy = strategy;
     }
 
-    public JsonObject executeStrategy(String message, String where){
-        return strategy.sendJson(message,where);
+    public JsonObject executeStrategy(UserRepository userRepository){
+        return strategy.sendJson(userRepository);
     }
 }
