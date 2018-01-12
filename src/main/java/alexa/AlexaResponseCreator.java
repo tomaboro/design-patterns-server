@@ -7,7 +7,7 @@ public class AlexaResponseCreator {
     public AlexaResponseCreator(String text, Boolean shouldEndSession) {
         OutputSpeechType outputSpeechType = new OutputSpeechType();
         outputSpeechType.setText(text);
-        outputSpeechType.setType("Plain text");
+        outputSpeechType.setType("PlainText");
         OutputSpeech outputSpeech = new OutputSpeech();
         outputSpeech.setText(text);
         Response response = new Response();
