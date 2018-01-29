@@ -8,11 +8,18 @@ import javax.json.JsonObject;
 public class GetUserID implements Strategy {
     @Override
     public JsonObject sendJson(UserRepository userRepository) {
-        String userID = "0"; //trzeba podac odpowiednie id ktore znajduje sie w userRepository
-        JsonObject value = Json.createObjectBuilder()
-                .add("id", userRepository.findOne(userID).getId())
-                .build();
-        return value;
+        int size = userRepository.findAll().size();
+        if (size == 0) {
+            JsonObject value = Json.createObjectBuilder()
+                    .add("id", "null")
+                    .build();
+            return value;
+        } else {
+            String userID = userRepository.findAll().get(size - 1).getId();
+            JsonObject value = Json.createObjectBuilder()
+                    .add("id", userRepository.findOne(userID).getId())
+                    .build();
+            return value;
+        }
     }
-
 }

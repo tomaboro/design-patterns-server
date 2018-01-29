@@ -1,5 +1,6 @@
 package spring.server.strategy;
 
+import spring.server.entity.User;
 import spring.server.repository.UserRepository;
 
 import javax.json.Json;
@@ -13,6 +14,9 @@ public class CreateUserID implements Strategy {
         JsonObject value = Json.createObjectBuilder()
                 .add("id", IDcounter.toString())
                 .build();
+        User user = new User();
+        user.setId(IDcounter.toString());
+        userRepository.save(user);
         IDcounter++;
         return value;
     }

@@ -1,6 +1,6 @@
 package spring.server.controller;
 
-import alexa.AlexaResponseCreator;
+import spring.server.factory.AlexaResponseCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,11 +11,12 @@ import spring.server.entity.*;
 import spring.server.entity.request.AddBeacon;
 import spring.server.entity.request.AddUserRequest;
 import spring.server.entity.request.Alexa.*;
+import spring.server.factory.AlexaResponseFactory;
+import spring.server.factory.ResponseInterface;
 import spring.server.repository.*;
 import spring.server.strategy.*;
 
 import javax.json.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,7 +25,7 @@ public class MainController {
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
     private BeaconRepository beaconRepository;
-    private List<Integer> usedIDs = new ArrayList<Integer>();
+    private AlexaResponseFactory factory = new AlexaResponseFactory();
 
     @Autowired
     public MainController(BeaconRepository beaconRepository, AlexaRepository alexaRepository, UserRepository userRepository) {
@@ -41,7 +42,7 @@ public class MainController {
     @RequestMapping(value = "/alexa", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
     public String getID(@RequestBody AlexaJSON alexaJSON) {
         String message = alexaJSON.getMessage();
-        AlexaResponseCreator alexaResponseCreator = new AlexaResponseCreator("Bad Alexa request", true);
+        ResponseInterface alexaResponse = factory.getResponse("ALEXA");
         Context context;
         JsonObject jsonObject;
         switch (message) {
@@ -49,26 +50,28 @@ public class MainController {
                 context = new Context(new CreateUserID());
                 jsonObject = context.executeStrategy(userRepository);
                 String id = jsonObject.getString("id");
-                alexaResponseCreator.setMessageText("Your ID is " + id);
-                usedIDs.add(Integer.valueOf(id));
+                alexaResponse.setMessageText("Your ID is " + id);
                 break;
             }
             case "GetUserID": {
                 context = new Context(new GetUserID());
                 jsonObject = context.executeStrategy(userRepository);
                 String id = jsonObject.getString("id");
-                alexaResponseCreator.setMessageText("Your ID is " + id);
+                if (id == "null")
+                    alexaResponse.setMessageText("First, you must create user ID.");
+                else
+                    alexaResponse.setMessageText("Your ID is " + id);
                 break;
             }
             case "GetLocation": {
                 context = new Context(new GetLocation());
                 jsonObject = context.executeStrategy(userRepository);
                 String beacons = jsonObject.getString("beacons");
-                alexaResponseCreator.setMessageText("You are within range of " + beacons);
+                alexaResponse.setMessageText("You are within range of " + beacons);
                 break;
             }
         }
-        return alexaResponseCreator.getAlexaResponse().toString();
+        return alexaResponse.getString();
     }
 
     @RequestMapping(value = "/alexa", method = RequestMethod.PUT)
