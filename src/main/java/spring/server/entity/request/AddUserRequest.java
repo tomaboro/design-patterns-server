@@ -1,7 +1,5 @@
 package spring.server.entity.request;
 
-import spring.server.entity.Beacon;
-
 import java.util.List;
 
 public class AddUserRequest {

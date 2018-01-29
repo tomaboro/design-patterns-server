@@ -2,8 +2,8 @@ package spring.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import spring.server.entity.Beacon;
+import spring.server.entity.Question;
 
 @Repository
-public interface BeaconRepository extends JpaRepository<Beacon, Long> {
+public interface QuestionRepository extends JpaRepository<Question, String> {
 }

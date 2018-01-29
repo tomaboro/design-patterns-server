@@ -1,6 +1,5 @@
 package spring.server.controller;
 
-import spring.server.factory.AlexaResponseCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import spring.server.entity.*;
-import spring.server.entity.request.AddBeacon;
+import spring.server.entity.request.AddQuestion;
 import spring.server.entity.request.AddUserRequest;
 import spring.server.entity.request.Alexa.*;
 import spring.server.factory.AlexaResponseFactory;
@@ -24,12 +23,12 @@ public class MainController {
 
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
-    private BeaconRepository beaconRepository;
+    private QuestionRepository questionRepository;
     private AlexaResponseFactory factory = new AlexaResponseFactory();
 
     @Autowired
-    public MainController(BeaconRepository beaconRepository, AlexaRepository alexaRepository, UserRepository userRepository) {
-        this.beaconRepository = beaconRepository;
+    public MainController(QuestionRepository questionRepository, AlexaRepository alexaRepository, UserRepository userRepository) {
+        this.questionRepository = questionRepository;
         this.userRepository = userRepository;
         this.alexaRepository = alexaRepository;
     }
@@ -95,17 +94,17 @@ public class MainController {
         return "OK";
     }
 
-    @RequestMapping(value = "/beacon", method = RequestMethod.GET)
-    public List<Beacon> getBeacon() {
-        return beaconRepository.findAll();
+    @RequestMapping(value = "/question", method = RequestMethod.GET)
+    public List<Question> getQuestion() {
+        return questionRepository.findAll();
     }
 
-    @RequestMapping(value = "/beacon", method = RequestMethod.POST)
-    public String addBeacon(@RequestBody AddBeacon addBeacon) {
-        Beacon beacon = new Beacon();
-        beacon.setId(addBeacon.getId());
-        beacon.setType(addBeacon.getType());
-        beaconRepository.save(beacon);
+    @RequestMapping(value = "/question", method = RequestMethod.POST)
+    public String addQuestion(@RequestBody AddQuestion addQuestion) {
+        Question question = new Question();
+        question.setQuestion(addQuestion.getQuestion());
+        question.setAnswer(addQuestion.getAnswer());
+        questionRepository.save(question);
         return "Positive request";
     }
 }
