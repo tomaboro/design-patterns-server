@@ -12,7 +12,7 @@ public class GetLocation implements Strategy {
         String beacons = "";
         //System.out.println(userRepository.findOne(userID).getBeacons().size());
         for (int i = 0; i < userRepository.findOne(userID).getBeacons().size(); i++) {
-           beacons += (userRepository.findOne(userID).getBeacons().get(i).getId()+" ") ;
+           beacons += (userRepository.findOne(userID).getBeacons().get(i)+" ") ;
         }
         JsonObject value = Json.createObjectBuilder()
                 .add("beacons",beacons)

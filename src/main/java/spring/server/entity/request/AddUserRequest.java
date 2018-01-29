@@ -6,7 +6,7 @@ import java.util.List;
 
 public class AddUserRequest {
     private String id;
-    private List<Beacon> beacons;
+    private List<String> beacons;
 
     public String getId() {
         return id;
@@ -16,11 +16,11 @@ public class AddUserRequest {
         this.id = id;
     }
 
-    public List<Beacon> getBeacons() {
+    public List<String> getBeacons() {
         return beacons;
     }
 
-    public void setBeacons(List<Beacon> beacons) {
+    public void setBeacons(List<String> beacons) {
         this.beacons = beacons;
     }
 }

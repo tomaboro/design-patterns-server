@@ -12,7 +12,7 @@ public class User {
     private String id;
 
     @ElementCollection
-    private List<Beacon> beacons;
+    private List<String> beacons;
 
     public String getId() {
         return id;
@@ -22,11 +22,11 @@ public class User {
         this.id = id;
     }
 
-    public List<Beacon> getBeacons() {
+    public List<String> getBeacons() {
         return beacons;
     }
 
-    public void setBeacons(List<Beacon> beacons) {
+    public void setBeacons(List<String> beacons) {
         this.beacons = beacons;
     }
 }
