@@ -23,12 +23,11 @@ public class MainController {
 
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
-    private QuestionRepository questionRepository;
     private AlexaResponseFactory factory = new AlexaResponseFactory();
+    private ChainOfResponsibilityStrategy chainOfResponsibilityStrategy;
 
     @Autowired
-    public MainController(QuestionRepository questionRepository, AlexaRepository alexaRepository, UserRepository userRepository) {
-        this.questionRepository = questionRepository;
+    public MainController( AlexaRepository alexaRepository, UserRepository userRepository) {
         this.userRepository = userRepository;
         this.alexaRepository = alexaRepository;
     }
@@ -45,30 +44,33 @@ public class MainController {
         Context context;
         JsonObject jsonObject;
         switch (message) {
-            case "CreateUserID": {
+            case "CreateUserID":
                 context = new Context(new CreateUserID());
                 jsonObject = context.executeStrategy(userRepository);
                 String id = jsonObject.getString("id");
                 alexaResponse.setMessageText("Your ID is " + id);
                 break;
-            }
-            case "GetUserID": {
+            case "GetUserID":
                 context = new Context(new GetUserID());
                 jsonObject = context.executeStrategy(userRepository);
-                String id = jsonObject.getString("id");
+                id = jsonObject.getString("id");
                 if (id == "null")
                     alexaResponse.setMessageText("First, you must create user ID.");
                 else
                     alexaResponse.setMessageText("Your ID is " + id);
                 break;
-            }
-            case "GetLocation": {
+            case "GetLocation":
                 context = new Context(new GetLocation());
                 jsonObject = context.executeStrategy(userRepository);
                 String beacons = jsonObject.getString("beacons");
                 alexaResponse.setMessageText("You are within range of " + beacons);
                 break;
-            }
+            case "ChainOfResponsibility":
+                context = new Context(chainOfResponsibilityStrategy);
+                //TODO
+                jsonObject = context.executeStrategy(userRepository);
+                alexaResponse.setMessageText(jsonObject.getString("answer"));
+                break;
         }
         return alexaResponse.getString();
     }
@@ -94,17 +96,30 @@ public class MainController {
         return "OK";
     }
 
-    @RequestMapping(value = "/question", method = RequestMethod.GET)
-    public List<Question> getQuestion() {
-        return questionRepository.findAll();
-    }
+    //@RequestMapping(value = "/question", method = RequestMethod.GET)
+    //public List<Question> getQuestion() {
+    //    return questionRepository.findAll();
+    //}
 
     @RequestMapping(value = "/question", method = RequestMethod.POST)
     public String addQuestion(@RequestBody AddQuestion addQuestion) {
-        Question question = new Question();
-        question.setQuestion(addQuestion.getQuestion());
-        question.setAnswer(addQuestion.getAnswer());
-        questionRepository.save(question);
+        if(chainOfResponsibilityStrategy != null) {
+            ChainOfResponsibility actual = chainOfResponsibilityStrategy;
+            ChainOfResponsibility next = chainOfResponsibilityStrategy.getNextHandler();
+            while (next != null) {
+                actual = next;
+                next = chainOfResponsibilityStrategy.getNextHandler();
+            }
+            actual.setNextHandler(new ChainOfResponsibilityStrategy(addQuestion.getQuestion(),addQuestion.getAnswer()));
+        }
+        else{
+            chainOfResponsibilityStrategy = new ChainOfResponsibilityStrategy(addQuestion.getQuestion(),addQuestion.getAnswer());
+        }
+
+        //Question question = new Question();
+        //question.setQuestion(addQuestion.getQuestion());
+        //question.setAnswer(addQuestion.getAnswer());
+        //questionRepository.save(question);
         return "Positive request";
     }
 }
