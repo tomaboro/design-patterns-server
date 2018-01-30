@@ -1,6 +1,6 @@
 package spring.server.entity.request;
 
-public class AddQuestion {
+public class QuestionRequest {
 
     private String question;
     private String answer;

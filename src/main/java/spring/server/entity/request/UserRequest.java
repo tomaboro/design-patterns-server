@@ -1,7 +1,7 @@
 package spring.server.entity.request;
 
 
-public class AddUserRequest {
+public class UserRequest {
     private String id;
     private String beacon;
 

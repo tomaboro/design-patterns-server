@@ -22,4 +22,12 @@ public abstract class ChainOfResponsibility {
         return nextHandler;
     }
     public abstract String handleRequest(String question);
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
 }

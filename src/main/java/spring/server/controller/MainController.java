@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import spring.server.entity.*;
-import spring.server.entity.request.AddQuestion;
-import spring.server.entity.request.AddUserRequest;
+import spring.server.entity.request.QuestionRequest;
+import spring.server.entity.request.UserRequest;
 import spring.server.entity.request.Alexa.*;
 import spring.server.factory.AlexaResponseFactory;
 import spring.server.factory.ResponseInterface;
@@ -89,11 +89,11 @@ public class MainController {
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
-    public String updateUser(@RequestBody AddUserRequest addUserRequest) {
+    public String updateUser(@RequestBody UserRequest userRequest) {
         User user;
-        if((user = userRepository.findOne(addUserRequest.getId())) != null)
+        if((user = userRepository.findOne(userRequest.getId())) != null)
         {
-            String beaconId = addUserRequest.getBeacon();
+            String beaconId = userRequest.getBeacon();
             List<String> beacons = user.getBeacons();
             if(!beacons.contains(beaconId)){
                 beacons.add(beaconId);
@@ -105,21 +105,21 @@ public class MainController {
         }
         else{
             user = new User();
-            user.setId(addUserRequest.getId());
+            user.setId(userRequest.getId());
             List<String> beacons = new LinkedList<String>();
-            beacons.add(addUserRequest.getBeacon());
+            beacons.add(userRequest.getBeacon());
             user.setBeacons(beacons);
         }
         userRepository.save(user);
         return "OK";
     }
     @RequestMapping(value = "/user", method = RequestMethod.DELETE)
-    public String deleteBeconFromUser(@RequestBody AddUserRequest addUserRequest) {
+    public String deleteBeconFromUser(@RequestBody UserRequest userRequest) {
         User user;
-        if((user = userRepository.findOne(addUserRequest.getId())) != null)
+        if((user = userRepository.findOne(userRequest.getId())) != null)
         {
             List<String> beacons = user.getBeacons();
-            if(!beacons.remove(addUserRequest.getBeacon()))
+            if(!beacons.remove(userRequest.getBeacon()))
                 return "This user doesn't have beacon of that id!";
             else
                 user.setBeacons(beacons);
@@ -138,24 +138,49 @@ public class MainController {
     //}
 
     @RequestMapping(value = "/question", method = RequestMethod.PUT)
-    public String addQuestion(@RequestBody AddQuestion addQuestion) {
+    public String addQuestion(@RequestBody QuestionRequest questionRequest) {
         if(chainOfResponsibilityStrategy != null) {
-            ChainOfResponsibility actual = chainOfResponsibilityStrategy;
-            ChainOfResponsibility next = chainOfResponsibilityStrategy.getNextHandler();
+            ChainOfResponsibilityStrategy actual = chainOfResponsibilityStrategy;
+            if(questionRequest.getQuestion().equals(actual.getQuestion()))
+                return "That Question is already added to chain!";
+            ChainOfResponsibilityStrategy next = chainOfResponsibilityStrategy.getNextHandler();
             while (next != null) {
+                if(questionRequest.getQuestion().equals(next.getQuestion()))
+                    return "That Question is already added to chain!";
                 actual = next;
-                next = chainOfResponsibilityStrategy.getNextHandler();
+                next = next.getNextHandler();
             }
-            actual.setNextHandler(new ChainOfResponsibilityStrategy(addQuestion.getQuestion(),addQuestion.getAnswer()));
+            actual.setNextHandler(new ChainOfResponsibilityStrategy(questionRequest.getQuestion(), questionRequest.getAnswer()));
         }
         else{
-            chainOfResponsibilityStrategy = new ChainOfResponsibilityStrategy(addQuestion.getQuestion(),addQuestion.getAnswer());
+            chainOfResponsibilityStrategy = new ChainOfResponsibilityStrategy(questionRequest.getQuestion(), questionRequest.getAnswer());
         }
+        return "Question added to chain successfully!";
+    }
 
-        //Question question = new Question();
-        //question.setQuestion(addQuestion.getQuestion());
-        //question.setAnswer(addQuestion.getAnswer());
-        //questionRepository.save(question);
-        return "Positive request";
+    @RequestMapping(value = "/question", method = RequestMethod.DELETE)
+    public String deleteQuestion(@RequestBody QuestionRequest questionRequest) {
+        if(chainOfResponsibilityStrategy != null) {
+            ChainOfResponsibilityStrategy actual = chainOfResponsibilityStrategy;
+            if(actual.getQuestion().equals(questionRequest.getQuestion())){
+                chainOfResponsibilityStrategy = actual.getNextHandler();
+            }
+            else{
+                ChainOfResponsibilityStrategy next = actual.getNextHandler();
+                while(next != null && !questionRequest.getQuestion().equals(next.getAnswer())){
+                    actual = next;
+                    next = next.getNextHandler();
+                }
+                if (next != null){
+                    actual.setNextHandler(next.getNextHandler());
+                }
+                else
+                    return "There is no such question in chain!";
+            }
+        }
+        else{
+            return "There is no such question in chain!";
+        }
+        return "Question removed from chain successfully!";
     }
 }

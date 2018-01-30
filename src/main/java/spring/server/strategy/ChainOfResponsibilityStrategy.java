@@ -28,4 +28,9 @@ public class ChainOfResponsibilityStrategy extends ChainOfResponsibility impleme
             return nextHandler.handleRequest(question);
         return "Question is not added to database";
     }
+
+    @Override
+    public ChainOfResponsibilityStrategy getNextHandler() {
+        return (ChainOfResponsibilityStrategy) nextHandler;
+    }
 }
