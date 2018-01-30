@@ -16,6 +16,7 @@ import spring.server.repository.*;
 import spring.server.strategy.*;
 
 import javax.json.JsonObject;
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -87,21 +88,49 @@ public class MainController {
         return userRepository.findAll();
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
-    public String addUser(@RequestBody AddUserRequest addUserRequest) {
-        User user = new User();
-        user.setId(addUserRequest.getId());
-        user.setBeacons(addUserRequest.getBeacons());
+    @RequestMapping(value = "/user", method = RequestMethod.PUT)
+    public String updateUser(@RequestBody AddUserRequest addUserRequest) {
+        User user;
+        if((user = userRepository.findOne(addUserRequest.getId())) != null)
+        {
+            String beaconId = addUserRequest.getBeacon();
+            List<String> beacons = user.getBeacons();
+            beacons.add(beaconId);
+            user.setBeacons(beacons);
+        }
+        else{
+            user = new User();
+            user.setId(addUserRequest.getId());
+            List<String> beacons = new LinkedList<String>();
+            beacons.add(addUserRequest.getBeacon());
+            user.setBeacons(beacons);
+        }
         userRepository.save(user);
         return "OK";
     }
+    @RequestMapping(value = "/user", method = RequestMethod.DELETE)
+    public String deleteBeconFromUser(@RequestBody AddUserRequest addUserRequest) {
+        User user;
+        if((user = userRepository.findOne(addUserRequest.getId())) != null)
+        {
+            List<String> beacons = user.getBeacons();
+            beacons.remove(addUserRequest.getBeacon());
+            user.setBeacons(beacons);
+        }
+        else{
+            return "User not exists!";
+        }
+        userRepository.save(user);
+        return "OK";
+    }
+
 
     //@RequestMapping(value = "/question", method = RequestMethod.GET)
     //public List<Question> getQuestion() {
     //    return questionRepository.findAll();
     //}
 
-    @RequestMapping(value = "/question", method = RequestMethod.POST)
+    @RequestMapping(value = "/question", method = RequestMethod.PUT)
     public String addQuestion(@RequestBody AddQuestion addQuestion) {
         if(chainOfResponsibilityStrategy != null) {
             ChainOfResponsibility actual = chainOfResponsibilityStrategy;

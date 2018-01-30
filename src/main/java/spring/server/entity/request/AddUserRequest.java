@@ -1,10 +1,9 @@
 package spring.server.entity.request;
 
-import java.util.List;
 
 public class AddUserRequest {
     private String id;
-    private List<String> beacons;
+    private String beacon;
 
     public String getId() {
         return id;
@@ -14,11 +13,11 @@ public class AddUserRequest {
         this.id = id;
     }
 
-    public List<String> getBeacons() {
-        return beacons;
+    public String getBeacon() {
+        return beacon;
     }
 
-    public void setBeacons(List<String> beacons) {
-        this.beacons = beacons;
+    public void setBeacon(String beacon) {
+        this.beacon = beacon;
     }
 }
