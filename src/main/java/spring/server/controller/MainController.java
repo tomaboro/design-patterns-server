@@ -42,11 +42,11 @@ public class MainController {
 
     @RequestMapping(value = "/alexa", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
     public String getID(@RequestBody AlexaJSON alexaJSON) {
-        String message = alexaJSON.getMessage();
+        String intent = alexaJSON.getIntent();
         ResponseInterface alexaResponse = factory.getResponse("ALEXA");
         Context context;
         JsonObject jsonObject;
-        switch (message) {
+        switch (intent) {
             case "CreateUserID":
                 context = new Context(new CreateUserID());
                 jsonObject = context.executeStrategy(userRepository);
@@ -75,7 +75,8 @@ public class MainController {
                 String random = jsonObject.getString("random");
                 alexaResponse.setMessageText("Your random number is " + random);
                 break;
-	    default:
+            case "AnswerQuestion":
+                String message = alexaJSON.getMessage();
                 if (chainOfResponsibility != null){
                     context = new Context(new QuestionStrategy(chainOfResponsibility,message));
 

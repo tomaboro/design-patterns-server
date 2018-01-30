@@ -11,7 +11,9 @@ public class AlexaJSON {
         this.request = request;
     }
 
-    public String getMessage(){
+    public String getIntent(){
         return request.intent.getName();
     }
+
+    public String getMessage(){return request.intent.slots.question.getValue();}
 }
