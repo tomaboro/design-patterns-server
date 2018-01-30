@@ -68,6 +68,16 @@ public class MainController {
                 String beacons = jsonObject.getString("beacons");
                 alexaResponse.setMessageText("You are within range of " + beacons);
                 break;
+<<<<<<< HEAD
+            default:
+                if (chainOfResponsibility != null){
+                    context = new Context(new QuestionStrategy(chainOfResponsibility,message));
+                    jsonObject = context.executeStrategy(userRepository);
+                    alexaResponse.setMessageText(jsonObject.getString(jsonObject.getString("answer")));
+                }
+                else
+                    alexaResponse.setMessageText("Question is not added to database");
+=======
 
             case "GetRandom":
                 context = new Context(new GetRandom());
@@ -75,15 +85,12 @@ public class MainController {
                 String random = jsonObject.getString("random");
                 alexaResponse.setMessageText("Your random number is " + random);
                 break;
-	    default:
-                if (chainOfResponsibility != null){
-                    context = new Context(new QuestionStrategy(chainOfResponsibility,message));
-
-                    jsonObject = context.executeStrategy(userRepository);
-                    alexaResponse.setMessageText(jsonObject.getString(jsonObject.getString("answer")));
-                }
-                else
-                    alexaResponse.setMessageText("Question is not added to database");
+            case "ChainOfResponsibility":
+                context = new Context(chainOfResponsibilityStrategy);
+                //TODO
+                jsonObject = context.executeStrategy(userRepository);
+                alexaResponse.setMessageText(jsonObject.getString("answer"));
+>>>>>>> 237ddcb1ac0465a347c1c7b13fcaab0adaee73f1
                 break;
         }
         return alexaResponse.getString();
