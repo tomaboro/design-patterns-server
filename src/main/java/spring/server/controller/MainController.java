@@ -95,8 +95,13 @@ public class MainController {
         {
             String beaconId = addUserRequest.getBeacon();
             List<String> beacons = user.getBeacons();
-            beacons.add(beaconId);
-            user.setBeacons(beacons);
+            if(!beacons.contains(beaconId)){
+                beacons.add(beaconId);
+                user.setBeacons(beacons);
+            }
+            else{
+                return "Beacon already added!";
+            }
         }
         else{
             user = new User();
@@ -114,8 +119,10 @@ public class MainController {
         if((user = userRepository.findOne(addUserRequest.getId())) != null)
         {
             List<String> beacons = user.getBeacons();
-            beacons.remove(addUserRequest.getBeacon());
-            user.setBeacons(beacons);
+            if(!beacons.remove(addUserRequest.getBeacon()))
+                return "This user doesn't have beacon of that id!";
+            else
+                user.setBeacons(beacons);
         }
         else{
             return "User not exists!";
