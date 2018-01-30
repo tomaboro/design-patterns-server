@@ -66,6 +66,13 @@ public class MainController {
                 String beacons = jsonObject.getString("beacons");
                 alexaResponse.setMessageText("You are within range of " + beacons);
                 break;
+
+            case "GetRandom":
+                context = new Context(new GetRandom());
+                jsonObject = context.executeStrategy(userRepository);
+                String random = jsonObject.getString("random");
+                alexaResponse.setMessageText("Your random number is " + random);
+                break;
             case "ChainOfResponsibility":
                 context = new Context(chainOfResponsibilityStrategy);
                 //TODO
