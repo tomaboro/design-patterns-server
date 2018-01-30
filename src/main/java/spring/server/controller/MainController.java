@@ -14,6 +14,8 @@ import spring.server.factory.AlexaResponseFactory;
 import spring.server.factory.ResponseInterface;
 import spring.server.repository.*;
 import spring.server.strategy.*;
+import spring.server.strategy.chain.AbstractChainOfResponsibility;
+import spring.server.strategy.chain.ChainOfResponsibility;
 
 import javax.json.JsonObject;
 import java.util.LinkedList;
@@ -25,7 +27,7 @@ public class MainController {
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
     private AlexaResponseFactory factory = new AlexaResponseFactory();
-    private ChainOfResponsibilityStrategy chainOfResponsibilityStrategy;
+    private AbstractChainOfResponsibility chainOfResponsibility;
 
     @Autowired
     public MainController( AlexaRepository alexaRepository, UserRepository userRepository) {
@@ -66,11 +68,14 @@ public class MainController {
                 String beacons = jsonObject.getString("beacons");
                 alexaResponse.setMessageText("You are within range of " + beacons);
                 break;
-            case "ChainOfResponsibility":
-                context = new Context(chainOfResponsibilityStrategy);
-                //TODO
-                jsonObject = context.executeStrategy(userRepository);
-                alexaResponse.setMessageText(jsonObject.getString("answer"));
+            default:
+                if (chainOfResponsibility != null){
+                    context = new Context(new QuestionStrategy(chainOfResponsibility,message));
+                    jsonObject = context.executeStrategy(userRepository);
+                    alexaResponse.setMessageText(jsonObject.getString(jsonObject.getString("answer")));
+                }
+                else
+                    alexaResponse.setMessageText("Question is not added to database");
                 break;
         }
         return alexaResponse.getString();
@@ -139,34 +144,34 @@ public class MainController {
 
     @RequestMapping(value = "/question", method = RequestMethod.PUT)
     public String addQuestion(@RequestBody QuestionRequest questionRequest) {
-        if(chainOfResponsibilityStrategy != null) {
-            ChainOfResponsibilityStrategy actual = chainOfResponsibilityStrategy;
+        if(chainOfResponsibility != null) {
+            AbstractChainOfResponsibility actual = chainOfResponsibility;
             if(questionRequest.getQuestion().equals(actual.getQuestion()))
                 return "That Question is already added to chain!";
-            ChainOfResponsibilityStrategy next = chainOfResponsibilityStrategy.getNextHandler();
+            AbstractChainOfResponsibility next = chainOfResponsibility.getNextHandler();
             while (next != null) {
                 if(questionRequest.getQuestion().equals(next.getQuestion()))
                     return "That Question is already added to chain!";
                 actual = next;
                 next = next.getNextHandler();
             }
-            actual.setNextHandler(new ChainOfResponsibilityStrategy(questionRequest.getQuestion(), questionRequest.getAnswer()));
+            actual.setNextHandler(new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer()));
         }
         else{
-            chainOfResponsibilityStrategy = new ChainOfResponsibilityStrategy(questionRequest.getQuestion(), questionRequest.getAnswer());
+            chainOfResponsibility = new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer());
         }
         return "Question added to chain successfully!";
     }
 
     @RequestMapping(value = "/question", method = RequestMethod.DELETE)
     public String deleteQuestion(@RequestBody QuestionRequest questionRequest) {
-        if(chainOfResponsibilityStrategy != null) {
-            ChainOfResponsibilityStrategy actual = chainOfResponsibilityStrategy;
+        if(chainOfResponsibility != null) {
+            AbstractChainOfResponsibility actual = chainOfResponsibility;
             if(actual.getQuestion().equals(questionRequest.getQuestion())){
-                chainOfResponsibilityStrategy = actual.getNextHandler();
+                chainOfResponsibility = actual.getNextHandler();
             }
             else{
-                ChainOfResponsibilityStrategy next = actual.getNextHandler();
+                AbstractChainOfResponsibility next = actual.getNextHandler();
                 while(next != null && !questionRequest.getQuestion().equals(next.getAnswer())){
                     actual = next;
                     next = next.getNextHandler();

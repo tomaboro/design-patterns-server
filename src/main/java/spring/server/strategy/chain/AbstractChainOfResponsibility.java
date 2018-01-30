@@ -1,24 +1,22 @@
-package spring.server.strategy;
+package spring.server.strategy.chain;
 
-import javax.json.JsonObject;
-
-public abstract class ChainOfResponsibility {
+public abstract class AbstractChainOfResponsibility {
 
     protected String question;
     protected String answer;
-    protected ChainOfResponsibility nextHandler;
+    protected AbstractChainOfResponsibility nextHandler;
 
-    public ChainOfResponsibility(String question, String answer) {
+    public AbstractChainOfResponsibility(String question, String answer) {
         this.question = question;
         this.answer = answer;
     }
 
-    public void setNextHandler(ChainOfResponsibility nextHandler) {
+    public void setNextHandler(AbstractChainOfResponsibility nextHandler) {
         this.nextHandler = nextHandler;
 
     }
 
-    public ChainOfResponsibility getNextHandler() {
+    public AbstractChainOfResponsibility getNextHandler() {
         return nextHandler;
     }
     public abstract String handleRequest(String question);
