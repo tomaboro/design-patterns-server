@@ -7,7 +7,7 @@ import javax.json.JsonObject;
 public class BeaconStrategy implements Strategy {
 
     @Override
-    public JsonObject sendJson(UserRepository userRepository) {
+    public String sendJson() {
         return null;
     }
 }

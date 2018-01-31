@@ -5,5 +5,5 @@ import spring.server.repository.UserRepository;
 import javax.json.JsonObject;
 
 public interface Strategy {
-    public JsonObject sendJson(UserRepository userRepository);
+    public String sendJson();
 }

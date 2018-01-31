@@ -7,17 +7,20 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 public class CreateUserID implements Strategy {
-    private static Integer IDcounter = 0;
+    private static Integer IDCounter = 0;
+    private UserRepository userRepository;
+
+    public CreateUserID(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
-    public JsonObject sendJson(UserRepository userRepository) {
-        JsonObject value = Json.createObjectBuilder()
-                .add("id", IDcounter.toString())
-                .build();
+    public String sendJson() {
+        String ID = IDCounter.toString();
         User user = new User();
-        user.setId(IDcounter.toString());
+        user.setId(IDCounter.toString());
         userRepository.save(user);
-        IDcounter++;
-        return value;
+        IDCounter++;
+        return ID;
     }
 }

@@ -6,17 +6,20 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 public class GetLocation implements Strategy {
+    private UserRepository userRepository;
+
+    public GetLocation(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
-    public JsonObject sendJson(UserRepository userRepository) {
+    public String sendJson() {
         String userID = "0"; //trzeba podac odpowiednie id ktore znajduje sie w userRepository
         String beacons = "";
         //System.out.println(userRepository.findOne(userID).getBeacons().size());
         for (int i = 0; i < userRepository.findOne(userID).getBeacons().size(); i++) {
-           beacons += (userRepository.findOne(userID).getBeacons().get(i)+" ") ;
+            beacons += (userRepository.findOne(userID).getBeacons().get(i) + " ");
         }
-        JsonObject value = Json.createObjectBuilder()
-                .add("beacons",beacons)
-                .build();
-        return value;
+        return beacons;
     }
 }

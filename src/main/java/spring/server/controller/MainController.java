@@ -33,7 +33,7 @@ public class MainController {
     private AbstractChainOfResponsibility chainOfResponsibility;
 
     @Autowired
-    public MainController( AlexaRepository alexaRepository, UserRepository userRepository) {
+    public MainController(AlexaRepository alexaRepository, UserRepository userRepository) {
         this.userRepository = userRepository;
         this.alexaRepository = alexaRepository;
     }
@@ -43,7 +43,7 @@ public class MainController {
         return alexaRepository.findAll();
     }
 
-    @RequestMapping(value = "/alexa", method = RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
+    @RequestMapping(value = "/alexa", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
     public String getID(@RequestBody String alexaJSON) throws JSONException {
         //String intent = alexaJSON.getIntent();
         //alexaJSON.getMessage();
@@ -53,45 +53,40 @@ public class MainController {
 
         ResponseInterface alexaResponse = factory.getResponse("ALEXA");
         Context context;
-        JsonObject jsonObject;
+        String alexaAnswer;
         switch (intent) {
             case "CreateUserID":
-                context = new Context(new CreateUserID());
-                jsonObject = context.executeStrategy(userRepository);
-                String id = jsonObject.getString("id");
-                alexaResponse.setMessageText("Your ID is " + id);
+                context = new Context(new CreateUserID(userRepository));
+                alexaAnswer = context.executeStrategy();
+                alexaResponse.setMessageText("Your ID is " + alexaAnswer);
                 break;
             case "GetUserID":
-                context = new Context(new GetUserID());
-                jsonObject = context.executeStrategy(userRepository);
-                id = jsonObject.getString("id");
-                if (id == "null")
+                context = new Context(new GetUserID(userRepository));
+                alexaAnswer = context.executeStrategy();
+                if (alexaAnswer == "null")
                     alexaResponse.setMessageText("First, you must create user ID.");
                 else
-                    alexaResponse.setMessageText("Your ID is " + id);
+                    alexaResponse.setMessageText("Your ID is " + alexaAnswer);
                 break;
             case "GetLocation":
-                context = new Context(new GetLocation());
-                jsonObject = context.executeStrategy(userRepository);
-                String beacons = jsonObject.getString("beacons");
-                alexaResponse.setMessageText("You are within range of " + beacons);
+                context = new Context(new GetLocation(userRepository));
+                alexaAnswer = context.executeStrategy();
+                alexaResponse.setMessageText("You are within range of " + alexaAnswer);
                 break;
 
             case "GetRandom":
                 context = new Context(new GetRandom());
-                jsonObject = context.executeStrategy(userRepository);
-                String random = jsonObject.getString("random");
-                alexaResponse.setMessageText("Your random number is " + random);
+                alexaAnswer = context.executeStrategy();
+                alexaResponse.setMessageText("Your random number is " + alexaAnswer);
                 break;
             case "AnswerQuestion":
                 String message = json.getJSONObject("request").getJSONObject("intent").getJSONObject("slots").getJSONObject("question").getString("value");
-                if (chainOfResponsibility != null){
-                    context = new Context(new QuestionStrategy(chainOfResponsibility,message));
+                if (chainOfResponsibility != null) {
+                    context = new Context(new QuestionStrategy(chainOfResponsibility, message));
 
-                    jsonObject = context.executeStrategy(userRepository);
-                    alexaResponse.setMessageText(jsonObject.getString("answer"));
-                }
-                else
+                    alexaAnswer = context.executeStrategy();
+                    alexaResponse.setMessageText(alexaAnswer);
+                } else
                     alexaResponse.setMessageText("Question is not added to database");
                 break;
         }
@@ -113,19 +108,16 @@ public class MainController {
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public String updateUser(@RequestBody UserRequest userRequest) {
         User user;
-        if((user = userRepository.findOne(userRequest.getId())) != null)
-        {
+        if ((user = userRepository.findOne(userRequest.getId())) != null) {
             String beaconId = userRequest.getBeacon();
             List<String> beacons = user.getBeacons();
-            if(!beacons.contains(beaconId)){
+            if (!beacons.contains(beaconId)) {
                 beacons.add(beaconId);
                 user.setBeacons(beacons);
-            }
-            else{
+            } else {
                 return "Beacon already added!";
             }
-        }
-        else{
+        } else {
             user = new User();
             user.setId(userRequest.getId());
             List<String> beacons = new LinkedList<String>();
@@ -135,18 +127,17 @@ public class MainController {
         userRepository.save(user);
         return "OK";
     }
+
     @RequestMapping(value = "/user", method = RequestMethod.DELETE)
     public String deleteBeconFromUser(@RequestBody UserRequest userRequest) {
         User user;
-        if((user = userRepository.findOne(userRequest.getId())) != null)
-        {
+        if ((user = userRepository.findOne(userRequest.getId())) != null) {
             List<String> beacons = user.getBeacons();
-            if(!beacons.remove(userRequest.getBeacon()))
+            if (!beacons.remove(userRequest.getBeacon()))
                 return "This user doesn't have beacon of that id!";
             else
                 user.setBeacons(beacons);
-        }
-        else{
+        } else {
             return "User not exists!";
         }
         userRepository.save(user);
@@ -161,20 +152,19 @@ public class MainController {
 
     @RequestMapping(value = "/question", method = RequestMethod.PUT)
     public String addQuestion(@RequestBody QuestionRequest questionRequest) {
-        if(chainOfResponsibility != null) {
+        if (chainOfResponsibility != null) {
             AbstractChainOfResponsibility actual = chainOfResponsibility;
-            if(questionRequest.getQuestion().equals(actual.getQuestion()))
+            if (questionRequest.getQuestion().equals(actual.getQuestion()))
                 return "That Question is already added to chain!";
             AbstractChainOfResponsibility next = chainOfResponsibility.getNextHandler();
             while (next != null) {
-                if(questionRequest.getQuestion().equals(next.getQuestion()))
+                if (questionRequest.getQuestion().equals(next.getQuestion()))
                     return "That Question is already added to chain!";
                 actual = next;
                 next = next.getNextHandler();
             }
             actual.setNextHandler(new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer()));
-        }
-        else{
+        } else {
             chainOfResponsibility = new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer());
         }
         return "Question added to chain successfully!";
@@ -182,25 +172,22 @@ public class MainController {
 
     @RequestMapping(value = "/question", method = RequestMethod.DELETE)
     public String deleteQuestion(@RequestBody QuestionRequest questionRequest) {
-        if(chainOfResponsibility != null) {
+        if (chainOfResponsibility != null) {
             AbstractChainOfResponsibility actual = chainOfResponsibility;
-            if(actual.getQuestion().equals(questionRequest.getQuestion())){
+            if (actual.getQuestion().equals(questionRequest.getQuestion())) {
                 chainOfResponsibility = actual.getNextHandler();
-            }
-            else{
+            } else {
                 AbstractChainOfResponsibility next = actual.getNextHandler();
-                while(next != null && !questionRequest.getQuestion().equals(next.getAnswer())){
+                while (next != null && !questionRequest.getQuestion().equals(next.getAnswer())) {
                     actual = next;
                     next = next.getNextHandler();
                 }
-                if (next != null){
+                if (next != null) {
                     actual.setNextHandler(next.getNextHandler());
-                }
-                else
+                } else
                     return "There is no such question in chain!";
             }
-        }
-        else{
+        } else {
             return "There is no such question in chain!";
         }
         return "Question removed from chain successfully!";

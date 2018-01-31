@@ -6,14 +6,11 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.Random;
 
-public class GetRandom implements Strategy{
+public class GetRandom implements Strategy {
     @Override
-    public JsonObject sendJson(UserRepository userRepository){
+    public String sendJson() {
         Random generator = new Random();
-        int x = generator.nextInt(101);
-        JsonObject value = Json.createObjectBuilder()
-                .add("random", x)
-                .build();
-        return value;
+        Integer x = generator.nextInt(101);
+        return x.toString();
     }
 }

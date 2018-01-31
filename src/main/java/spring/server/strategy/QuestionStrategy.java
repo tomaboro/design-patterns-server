@@ -17,11 +17,8 @@ public class QuestionStrategy implements Strategy {
     }
 
     @Override
-    public JsonObject sendJson(UserRepository userRepository) {
+    public String sendJson() {
         String answer = chain.handleRequest(question);
-        JsonObject value = Json.createObjectBuilder()
-                .add("answer",answer)
-                .build();
-        return value;
+        return answer;
     }
 }

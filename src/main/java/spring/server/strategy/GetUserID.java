@@ -6,20 +6,20 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 public class GetUserID implements Strategy {
+    private UserRepository userRepository;
+
+    public GetUserID(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
-    public JsonObject sendJson(UserRepository userRepository) {
+    public String sendJson() {
         int size = userRepository.findAll().size();
         if (size == 0) {
-            JsonObject value = Json.createObjectBuilder()
-                    .add("id", "null")
-                    .build();
-            return value;
+            return "null";
         } else {
             String userID = userRepository.findAll().get(size - 1).getId();
-            JsonObject value = Json.createObjectBuilder()
-                    .add("id", userRepository.findOne(userID).getId())
-                    .build();
-            return value;
+            return userID;
         }
     }
 }
