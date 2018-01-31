@@ -1,5 +1,8 @@
 package spring.server.controller;
 
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,9 +43,14 @@ public class MainController {
         return alexaRepository.findAll();
     }
 
-    @RequestMapping(value = "/alexa", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public String getID(@RequestBody AlexaJSON alexaJSON) {
-        String intent = alexaJSON.getIntent();
+    @RequestMapping(value = "/alexa", method = RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String getID(@RequestBody String alexaJSON) throws JSONException {
+        //String intent = alexaJSON.getIntent();
+        //alexaJSON.getMessage();
+        System.out.println(alexaJSON);
+        JSONObject json = new JSONObject(alexaJSON);
+        String intent = json.getJSONObject("request").getJSONObject("intent").getString("name");
+
         ResponseInterface alexaResponse = factory.getResponse("ALEXA");
         Context context;
         JsonObject jsonObject;
@@ -76,7 +84,7 @@ public class MainController {
                 alexaResponse.setMessageText("Your random number is " + random);
                 break;
             case "AnswerQuestion":
-                String message = alexaJSON.getMessage();
+                String message = json.getJSONObject("request").getJSONObject("intent").getJSONObject("slots").getJSONObject("question").getString("value");
                 if (chainOfResponsibility != null){
                     context = new Context(new QuestionStrategy(chainOfResponsibility,message));
 
