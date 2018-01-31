@@ -81,7 +81,7 @@ public class MainController {
                     context = new Context(new QuestionStrategy(chainOfResponsibility,message));
 
                     jsonObject = context.executeStrategy(userRepository);
-                    alexaResponse.setMessageText(jsonObject.getString(jsonObject.getString("answer")));
+                    alexaResponse.setMessageText(jsonObject.getString("answer"));
                 }
                 else
                     alexaResponse.setMessageText("Question is not added to database");
