@@ -4,7 +4,7 @@ public class QuestionRequest {
 
     private String question;
     private String answer;
-
+    private String beaconID;
     public String getQuestion() {
         return question;
     }
@@ -19,5 +19,13 @@ public class QuestionRequest {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getBeaconID() {
+        return beaconID;
+    }
+
+    public void setBeaconID(String beaconID) {
+        this.beaconID = beaconID;
     }
 }

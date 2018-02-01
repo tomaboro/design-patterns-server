@@ -35,7 +35,7 @@ public class MainController {
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
     private AlexaResponseFactory factory = new AlexaResponseFactory();
-    private AbstractChainOfResponsibility chainOfResponsibility;
+    private ChainOfResponsibility chainOfResponsibility;
     private ArrayList<Integer> numbers = new ArrayList<>();
     private Boolean generateRandom = false;
 
@@ -104,7 +104,7 @@ public class MainController {
             case "AnswerQuestion":
                 String message = json.getJSONObject("request").getJSONObject("intent").getJSONObject("slots").getJSONObject("question").getString("value");
                 if (chainOfResponsibility != null) {
-                    context = new Context(new QuestionStrategy(chainOfResponsibility, message));
+                    context = new Context(new QuestionStrategy(chainOfResponsibility, message,userRepository));
 
                     alexaAnswer = context.executeStrategy();
                     alexaResponse.setMessageText(alexaAnswer);
@@ -150,7 +150,7 @@ public class MainController {
         return "OK";
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String deleteBeconFromUser(@RequestBody UserRequest userRequest) {
         User user;
         if ((user = userRepository.findOne(userRequest.getId())) != null) {
@@ -169,19 +169,19 @@ public class MainController {
     @RequestMapping(value = "/question", method = RequestMethod.PUT)
     public String addQuestion(@RequestBody QuestionRequest questionRequest) {
         if (chainOfResponsibility != null) {
-            AbstractChainOfResponsibility actual = chainOfResponsibility;
-            if (questionRequest.getQuestion().equals(actual.getQuestion()))
+            ChainOfResponsibility actual = chainOfResponsibility;
+            if (questionRequest.getQuestion().equals(actual.getQuestion()) && questionRequest.getQuestion().equals(actual.getBeaconID()))
                 return "That Question is already added to chain!";
-            AbstractChainOfResponsibility next = chainOfResponsibility.getNextHandler();
+            ChainOfResponsibility next = chainOfResponsibility.getNextHandler();
             while (next != null) {
-                if (questionRequest.getQuestion().equals(next.getQuestion()))
+                if (questionRequest.getQuestion().equals(next.getQuestion()) && questionRequest.getBeaconID().equals(next.getBeaconID()))
                     return "That Question is already added to chain!";
                 actual = next;
                 next = next.getNextHandler();
             }
-            actual.setNextHandler(new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer()));
+            actual.setNextHandler(new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer(),questionRequest.getBeaconID()));
         } else {
-            chainOfResponsibility = new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer());
+            chainOfResponsibility = new ChainOfResponsibility(questionRequest.getQuestion(), questionRequest.getAnswer(),questionRequest.getBeaconID());
         }
         return "Question added to chain successfully!";
     }
@@ -189,12 +189,12 @@ public class MainController {
     @RequestMapping(value = "/question", method = RequestMethod.DELETE)
     public String deleteQuestion(@RequestBody QuestionRequest questionRequest) {
         if (chainOfResponsibility != null) {
-            AbstractChainOfResponsibility actual = chainOfResponsibility;
-            if (actual.getQuestion().equals(questionRequest.getQuestion())) {
+            ChainOfResponsibility actual = chainOfResponsibility;
+            if (actual.getQuestion().equals(questionRequest.getQuestion()) && actual.getBeaconID().equals(questionRequest.getBeaconID())) {
                 chainOfResponsibility = actual.getNextHandler();
             } else {
-                AbstractChainOfResponsibility next = actual.getNextHandler();
-                while (next != null && !questionRequest.getQuestion().equals(next.getAnswer())) {
+                ChainOfResponsibility next = actual.getNextHandler();
+                while (next != null && !questionRequest.getQuestion().equals(next.getAnswer()) && !questionRequest.getBeaconID().equals(next.getBeaconID())) {
                     actual = next;
                     next = next.getNextHandler();
                 }
@@ -209,10 +209,11 @@ public class MainController {
         return "Question removed from chain successfully!";
     }
 
-    @Scheduled(fixedDelay = 6000)
+    @Scheduled(fixedDelay = 60000)
     public void scheduleFixedDelayTask() {
-        while(!generateRandom){}
-        Random generator = new Random();
-        numbers.add(generator.nextInt(101));
+        if(generateRandom) {
+            Random generator = new Random();
+            numbers.add(generator.nextInt(101));
+        }
     }
 }
