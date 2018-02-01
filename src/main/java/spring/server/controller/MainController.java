@@ -86,10 +86,21 @@ public class MainController {
                 break;
             case "StartGenerate":
                 generateRandom = true;
+                alexaResponse.setMessageText("Started");
+                break;
             case "StopGenerate":
                 generateRandom = false;
+                alexaResponse.setMessageText("Stoped");
+                break;
             case "GetList":
-                alexaResponse.setMessageText("Numbers: "+ numbers.toString());
+                if(numbers.isEmpty()){
+                    alexaResponse.setMessageText("List is empty");
+                }
+                else{
+                    alexaResponse.setMessageText("Numbers: "+ numbers.toString());
+                    numbers.clear();
+                }
+                break;
             case "AnswerQuestion":
                 String message = json.getJSONObject("request").getJSONObject("intent").getJSONObject("slots").getJSONObject("question").getString("value");
                 if (chainOfResponsibility != null) {
