@@ -5,6 +5,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,16 +23,21 @@ import spring.server.strategy.chain.AbstractChainOfResponsibility;
 import spring.server.strategy.chain.ChainOfResponsibility;
 
 import javax.json.JsonObject;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 @RestController
+@EnableScheduling
 public class MainController {
 
     private AlexaRepository alexaRepository;
     private UserRepository userRepository;
     private AlexaResponseFactory factory = new AlexaResponseFactory();
     private AbstractChainOfResponsibility chainOfResponsibility;
+    private ArrayList<Integer> numbers = new ArrayList<>();
+    private Boolean generateRandom = false;
 
     @Autowired
     public MainController(AlexaRepository alexaRepository, UserRepository userRepository) {
@@ -45,8 +52,6 @@ public class MainController {
 
     @RequestMapping(value = "/alexa", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
     public String getID(@RequestBody String alexaJSON) throws JSONException {
-        //String intent = alexaJSON.getIntent();
-        //alexaJSON.getMessage();
         System.out.println(alexaJSON);
         JSONObject json = new JSONObject(alexaJSON);
         String intent = json.getJSONObject("request").getJSONObject("intent").getString("name");
@@ -79,6 +84,12 @@ public class MainController {
                 alexaAnswer = context.executeStrategy();
                 alexaResponse.setMessageText("Your random number is " + alexaAnswer);
                 break;
+            case "StartGenerate":
+                generateRandom = true;
+            case "StopGenerate":
+                generateRandom = false;
+            case "GetList":
+                alexaResponse.setMessageText("Numbers: "+ numbers.toString());
             case "AnswerQuestion":
                 String message = json.getJSONObject("request").getJSONObject("intent").getJSONObject("slots").getJSONObject("question").getString("value");
                 if (chainOfResponsibility != null) {
@@ -144,12 +155,6 @@ public class MainController {
         return "OK";
     }
 
-
-    //@RequestMapping(value = "/question", method = RequestMethod.GET)
-    //public List<Question> getQuestion() {
-    //    return questionRepository.findAll();
-    //}
-
     @RequestMapping(value = "/question", method = RequestMethod.PUT)
     public String addQuestion(@RequestBody QuestionRequest questionRequest) {
         if (chainOfResponsibility != null) {
@@ -191,5 +196,12 @@ public class MainController {
             return "There is no such question in chain!";
         }
         return "Question removed from chain successfully!";
+    }
+
+    @Scheduled(fixedDelay = 6000)
+    public void scheduleFixedDelayTask() {
+        while(!generateRandom){}
+        Random generator = new Random();
+        numbers.add(generator.nextInt(101));
     }
 }
